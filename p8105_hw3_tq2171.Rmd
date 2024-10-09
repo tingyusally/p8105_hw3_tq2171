@@ -35,3 +35,41 @@ tmax: Maximum temperature (tenths of degrees C)
 tmin: Minimum temperature (tenths of degrees C)
 
 The type of each variable are the following: id is `r class(ny_noaa$id)`,  date is `r class(ny_noaa$date)`, prcp is `r class(ny_noaa$prcp)`, snow is `r class(ny_noaa$snow)`, snwd is `r class(ny_noaa$snwd)`, tmax is `r class(ny_noaa$tmax)`, tmin is `r class(ny_noaa$tmin)`. Variables "prcp", "snow", "snwd" are the integer variables. Variables "id", "tmax" and "tmin" are character variables. There are `r sum(is.na(ny_noaa$prcp))` or `r round((sum(is.na(ny_noaa$prcp))/2595176)*100, 2)`% missing value in the variable "prcp", `r sum(is.na(ny_noaa$snow))` or `r round((sum(is.na(ny_noaa$snow))/2595176)*100, 2)`% missing value in the variable "snow", `r sum(is.na(ny_noaa$snwd))` or `r round((sum(is.na(ny_noaa$snwd))/2595176)*100, 2)`% missing value in the variable "snwd", `r sum(is.na(ny_noaa$tmax))` or `r round((sum(is.na(ny_noaa$tmax))/2595176)*100, 2)`% missing value in the variable "tmax" and `r sum(is.na(ny_noaa$tmin))`  or `r round((sum(is.na(ny_noaa$tmin))/2595176)*100, 2)`% missing value in the variable "tmin". 
+
+```{r,warning=FALSE, message=FALSE}
+#load the needed library
+library(lubridate)
+```
+
+```{r}
+# Create separate variables for year, month, and day
+ny_noaa$year <- year(ny_noaa$date)
+ny_noaa$month <- month(ny_noaa$date)
+ny_noaa$day <- day(ny_noaa$date)
+```
+
+```{r}
+# Precipitation (prcp): Currently in tenths of mm, divide by 10 to convert to millimeters (mm).
+ny_noaa$prcp_mm <- ny_noaa$prcp / 10
+
+# Maximum temperature (tmax): In tenths of degrees Celsius, divide by 10 to convert to degrees Celsius.
+ny_noaa$tmax <- as.numeric(ny_noaa$tmax)
+ny_noaa$tmax_c <- ny_noaa$tmax / 10
+
+#Minimum temperature (tmin): In tenths of degrees Celsius, divide by 10 to convert to degrees Celsius.
+ny_noaa$tmin <- as.numeric(ny_noaa$tmin)
+ny_noaa$tmin_c <- ny_noaa$tmin / 10
+```
+
+```{r}
+#Identify the most commonly observed values in "snowfall"
+
+# Count occurrences of each snowfall value
+snowfall_counts <- table(ny_noaa$snow)
+# Sort the counts in descending order to find the most common values
+sorted_snowfall <- sort(snowfall_counts, decreasing = TRUE)
+# Display the most common snowfall values
+head(sorted_snowfall)
+```
+
+The high frequency of 0 snowfall values in the dataset, with over 2 million occurrences, likely reflects the fact that snowfall is not a daily event in many regions, especially outside of winter months. Other smaller values, like 25, 13, and 51 mm, represent light snowfalls, which occur less frequently but are still common in regions with occasional snow. The predominance of zero snowfall days is expected when considering regions that experience seasonal snow or generally warmer climates.
