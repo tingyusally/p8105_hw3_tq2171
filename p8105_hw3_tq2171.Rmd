@@ -1,0 +1,37 @@
+---
+title: "p8105_hw3_tq2171"
+author: "Tingyu Qian"
+date: "2024-10-9"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Problem 1
+```{r}
+# load the library and the dataset
+library(p8105.datasets)
+data("ny_noaa")
+```
+
+In the dataset "ny_noaa", it contains `r nrow(ny_noaa)` and `r ncol(ny_noaa)` columns, which means there are 7 variables. Name of the 7 variables are the following: `r names(ny_noaa)`.
+
+The following are the variables introduction:
+
+id: Weather station ID
+
+date: Date of observation
+
+prcp: Precipitation (tenths of mm)
+
+snow: Snowfall (mm)
+
+snwd: Snow depth (mm)
+
+tmax: Maximum temperature (tenths of degrees C)
+
+tmin: Minimum temperature (tenths of degrees C)
+
+The type of each variable are the following: id is `r class(ny_noaa$id)`,  date is `r class(ny_noaa$date)`, prcp is `r class(ny_noaa$prcp)`, snow is `r class(ny_noaa$snow)`, snwd is `r class(ny_noaa$snwd)`, tmax is `r class(ny_noaa$tmax)`, tmin is `r class(ny_noaa$tmin)`. Variables "prcp", "snow", "snwd" are the integer variables. Variables "id", "tmax" and "tmin" are character variables. There are `r sum(is.na(ny_noaa$prcp))` or `r round((sum(is.na(ny_noaa$prcp))/2595176)*100, 2)`% missing value in the variable "prcp", `r sum(is.na(ny_noaa$snow))` or `r round((sum(is.na(ny_noaa$snow))/2595176)*100, 2)`% missing value in the variable "snow", `r sum(is.na(ny_noaa$snwd))` or `r round((sum(is.na(ny_noaa$snwd))/2595176)*100, 2)`% missing value in the variable "snwd", `r sum(is.na(ny_noaa$tmax))` or `r round((sum(is.na(ny_noaa$tmax))/2595176)*100, 2)`% missing value in the variable "tmax" and `r sum(is.na(ny_noaa$tmin))`  or `r round((sum(is.na(ny_noaa$tmin))/2595176)*100, 2)`% missing value in the variable "tmin". 
