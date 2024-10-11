@@ -73,3 +73,43 @@ head(sorted_snowfall)
 ```
 
 The high frequency of 0 snowfall values in the dataset, with over 2 million occurrences, likely reflects the fact that snowfall is not a daily event in many regions, especially outside of winter months. Other smaller values, like 25, 13, and 51 mm, represent light snowfalls, which occur less frequently but are still common in regions with occasional snow. The predominance of zero snowfall days is expected when considering regions that experience seasonal snow or generally warmer climates.
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+```
+
+```{r}
+# Filter for January (1) and July (7)
+jan_july_data <- ny_noaa %>% 
+  filter(month %in% c("1", "7")) %>%
+  mutate(month_name = ifelse(month == "1", "January", "July"))
+```
+
+
+```{r}
+# Group by station, year, and month, and calculate average max temperature (tmax) per station and month
+avg_temp <- jan_july_data %>%
+  group_by(id, year, month_name) %>%
+  summarise(avg_tmax = mean(tmax_c, na.rm = TRUE))
+```
+
+```{r}
+# Remove any missing values (if needed)
+avg_temp <- avg_temp %>% filter(!is.na(avg_tmax))
+# Create a two-panel plot
+ggplot(avg_temp, aes(x = year, y = avg_tmax)) +
+  geom_point(alpha=0.5) +
+  facet_grid(~ month_name) +# Create two panels for January and July
+  labs(title = "Average Max Temperature in January and July Across Years",
+       x = "Year",
+       y = "Average Max Temperature (°C)") +
+  theme(legend.position = "bottom")
+```
+
+The plot shows clear seasonal differences between January and July temperatures. In January, there is an observable warming trend starting around 1990, with average maximum temperatures increasing over time, possibly suggesting the effects of climate change on winter temperatures. January temperatures often fall below 0°C, with some notable dips close to or below -10°C, indicating particularly cold years or regions. In contrast, July temperatures are more consistent, with average maximum temperatures generally between 25°C and 30°C, showing less variability than January.
+
+There are also some outliers present in the data. In January, certain years show unusually low temperatures, which may represent colder than average years. In July, a few temperatures drop below 20°C, which is unusual for summer and could either reflect rare cooler summers or potential data errors. The overall trend suggests a warming pattern in January, while July temperatures appear more stable.
+
+
