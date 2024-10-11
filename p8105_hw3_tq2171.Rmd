@@ -112,4 +112,27 @@ The plot shows clear seasonal differences between January and July temperatures.
 
 There are also some outliers present in the data. In January, certain years show unusually low temperatures, which may represent colder than average years. In July, a few temperatures drop below 20°C, which is unusual for summer and could either reflect rare cooler summers or potential data errors. The overall trend suggests a warming pattern in January, while July temperatures appear more stable.
 
+```{r}
+# 1. tmax vs tmin plot (using density plot)
+tmax_tmin_density_plot <- ggplot(ny_noaa) +
+  geom_density(aes(x = tmax_c, fill = "tmax"), alpha = 0.5) +  # Density for tmax
+  geom_density(aes(x = tmin_c, fill = "tmin"), alpha = 0.5) +  # Density for tmin
+  scale_fill_manual(values = c("tmax" = "red", "tmin" = "blue")) +
+  labs(title = "Density Plot of tmax and tmin",
+       x = "Temperature (°C)",
+       fill = "Variable") +
+  theme_minimal()
+```
+
+```{r}
+# 2. Snowfall distribution (snowfall > 0 and < 100) by year
+snowfall_violin_plot <- ggplot(snow_filtered, aes(x = year, y = snow)) +
+  geom_violin(aes(fill = year)) +  # Violin plot showing distribution by year
+  labs(title = "Snowfall Values Distribution (0 < snow < 100) by Year",
+       x = "Year",
+       y = "Snowfall (mm)")
+
+# Display violin plot
+snowfall_violin_plot
+```
 
