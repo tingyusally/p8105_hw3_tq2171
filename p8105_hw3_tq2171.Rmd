@@ -136,3 +136,76 @@ snowfall_violin_plot <- ggplot(snow_filtered, aes(x = year, y = snow)) +
 snowfall_violin_plot
 ```
 
+# Problem 2
+```{r, warning=FALSE, message=FALSE}
+## read and clean the data
+library(tidyverse) 
+nhanes_accel = read_csv (file = "./nhanes_accel.csv", na = c("NA", ".")) #read the data
+nhanes_covar = read_csv (file = "./nhanes_covar.csv", na = c("NA", "."), skip=4) #read the data
+```
+
+```{r}
+# Rename columns in the covariates dataset and convert to appropriate types
+nhanes_covar <- 
+  nhanes_covar %>%
+  mutate(
+    sex = recode(sex, `1` = "male", `2` = "female"),
+    education = recode(education, 
+                       `1` = "Less than high school", 
+                       `2` = "High school equivalent", 
+                       `3` = "More than high school"),
+    age = as.numeric(age),  # Ensure age is numeric
+    BMI = as.numeric(BMI)   # Ensure BMI is numeric
+  )
+```
+
+```{r}
+# Merge the nhanes_accel dataset and nhanes_covar dataset by 'SEQN'
+nhanes_merged <- nhanes_covar %>%
+  inner_join(nhanes_accel, by = "SEQN")
+```
+
+```{r}
+# Exclude participants under 21 years of age
+nhanes_merged <- nhanes_merged %>%
+  filter(age >= 21)
+```
+
+```{r}
+# Remove rows with missing demographic data
+nhanes_merged <- nhanes_merged %>%
+  drop_na(sex, age, BMI, education)
+```
+
+```{r}
+# Create a summary table of the number of men and women in each education category
+gender_education_table <- nhanes_merged %>%
+  group_by(education, sex) %>%
+  summarise(count = n()) %>%
+  ungroup() %>%
+  arrange(education, sex)
+```
+
+```{r}
+# Display the summary table
+print(gender_education_table)
+```
+
+```{r}
+# Visualize the age distributions for men and women within each education category
+ggplot(nhanes_merged, aes(x = age, fill = sex)) +
+  geom_density(alpha = 0.5) +  # Density plot with transparency for overlapping areas
+  facet_wrap(~ education) +  # Facet by education category
+  labs(title = "Age Distributions by Sex and Education Category",
+       x = "Age (years)",
+       y = "Density",
+       fill = "Sex") +
+  theme_minimal()
+```
+The age distributions by sex across the three education categories reveal distinct patterns. In the "High School Equivalent", both men and women exhibit a fairly balanced distribution, with peaks around the 40 to 60-year range. There is some overlap between the distributions, but men slightly dominate in younger ages, while women are more represented at older ages. In the "Less than high school" category, the age distribution for women skews toward older ages, with a significant peak around the 70 to 80-year range, suggesting that this group has more older women.
+For men, the distribution covers a wider age range, with peaks appearing in both middle-aged (40-50 years) and older (70-80 years) groups. In the "More than high school" category, the age distributions suggest that women are more concentrated in younger age ranges, with a noticeable peak around 20 to 40 years, while the distribution for men spans a broader range, with a slightly higher density in younger ages (30-50 years). This may suggest that more men pursued higher education at younger ages.
+
+
+
+
+
