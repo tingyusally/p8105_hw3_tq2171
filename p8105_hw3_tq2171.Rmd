@@ -113,7 +113,7 @@ The plot shows clear seasonal differences between January and July temperatures.
 There are also some outliers present in the data. In January, certain years show unusually low temperatures, which may represent colder than average years. In July, a few temperatures drop below 20°C, which is unusual for summer and could either reflect rare cooler summers or potential data errors. The overall trend suggests a warming pattern in January, while July temperatures appear more stable.
 
 ```{r}
-# 1. tmax vs tmin plot (using density plot)
+# tmax vs tmin plot (using density plot)
 tmax_tmin_density_plot <- ggplot(ny_noaa) +
   geom_density(aes(x = tmax_c, fill = "tmax"), alpha = 0.5) +  # Density for tmax
   geom_density(aes(x = tmin_c, fill = "tmin"), alpha = 0.5) +  # Density for tmin
@@ -125,7 +125,7 @@ tmax_tmin_density_plot <- ggplot(ny_noaa) +
 ```
 
 ```{r}
-# 2. Snowfall distribution (snowfall > 0 and < 100) by year
+# Snowfall distribution (snowfall > 0 and < 100) by year
 snowfall_violin_plot <- ggplot(snow_filtered, aes(x = year, y = snow)) +
   geom_violin(aes(fill = year)) +  # Violin plot showing distribution by year
   labs(title = "Snowfall Values Distribution (0 < snow < 100) by Year",
@@ -227,7 +227,7 @@ ggplot(nhanes_total_activity, aes(x = age, y = total_activity, color = sex)) +
     color = "Sex"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Adjust x-axis text
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 The plot shows the relationship between total activity (MIMS) and age, separated by education level and sex. Across all education categories, there is a noticeable decline in total activity with increasing age, although the trends differ slightly between men and women.
@@ -261,17 +261,110 @@ ggplot(nhanes_long, aes(x = minute, y = activity, color = sex)) +
     color = "Sex"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis text for readability
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 The 24-hour activity time course plot reveals clear daily activity patterns across different education levels, with some similarities and subtle differences between men and women. Across all three education levels—"High school equivalent," "Less than high school," and "More than high school"—activity levels increase steadily in the morning (around minute 500, corresponding to 8–9 AM), peak around midday and early afternoon, and decline in the evening. There are small differences between men and women, with women generally showing slightly higher activity levels throughout the day, especially in the "More than high school" category. This might reflect more structured or habitual physical activities among women with higher education. Meanwhile, the "Less than high school" group shows slightly more variability in activity levels during peak hours. Overall, the pattern is consistent: activity peaks around midday and declines steadily toward the evening, with education level appearing to influence the smoothness and consistency of daily activity patterns.
 
+# Problem 3
+```{r}
+#Import the datasets
+jan_2020 <- read_csv("./Jan 2020 Citi.csv")
+jan_2024 <- read_csv("./Jan 2024 Citi.csv")
+jul_2020 <- read_csv("./July 2020 Citi.csv")
+jul_2024 <- read_csv("./July 2024 Citi.csv")
+```
+
+```{r}
+# Combine the datasets into one
+all_rides <- bind_rows(
+  jan_2020 %>% mutate(month = "January", year = 2020),
+  jan_2024 %>% mutate(month = "January", year = 2024),
+  jul_2020 %>% mutate(month = "July", year = 2020),
+  jul_2024 %>% mutate(month = "July", year = 2024)
+)
+```
+
+```{r}
+# Group by year, month, and membership type to calculate total rides
+ride_summary <- all_rides %>%
+  group_by(year, month, member_casual) %>%
+  summarise(total_rides = n()) %>%
+  ungroup()
+```
+
+```{r}
+# Pivot to create a reader-friendly table
+reader_friendly_table <- ride_summary %>%
+  pivot_wider(names_from = member_casual, values_from = total_rides, values_fill = 0)
+# View the table
+print(reader_friendly_table)
+```
+
+The summary table reveals a clear seasonal trend in Citi Bike usage, with more rides occurring in July compared to January, reflecting increased activity during warmer months. From 2020 to 2024, there is a significant increase in both casual and member rides, indicating growing adoption of the bike-sharing service. Notably, casual rides more than doubled over this period, with 2108 rides in January 2024 compared to 984 rides in January 2020, and 10894 rides in July 2024 compared to 5637 rides in July 2020. This suggests expanding interest from non-members. Meanwhile, member rides also increased steadily, from 15411 in July 2020 to 36262 in July 2024, highlighting continued value for regular users. These trends suggest that Citi Bike is growing in popularity, attracting both casual users and maintaining engagement with members throughout the years.
+
+```{r}
+# Filter the data for July 2024
+july_2024_data <- all_rides %>%
+  filter(year == 2024, month == "July")
+
+# Group by start station and count the number of rides originating from each station
+top_stations <- july_2024_data %>%
+  group_by(start_station_name) %>%
+  summarise(num_rides = n()) %>%
+  arrange(desc(num_rides)) %>%
+  slice_head(n = 5)  # Select the top 5 stations
+
+# Display the table
+print(top_stations)
+```
+
+```{r}
+# Calculate the median ride duration for each combination of day, month, and year
+median_duration_data <- all_rides %>%
+  group_by(weekdays, month, year) %>%
+  summarise(median_duration = median(duration, na.rm = TRUE)) %>%
+  ungroup()
+
+# Create the plot
+ggplot(median_duration_data, aes(x = weekdays, y = median_duration, fill = factor(year))) +
+  geom_bar(stat = "identity", position = "dodge") +  # Bar plot to compare median durations
+  facet_wrap(~ month, ncol = 2) +  # Create separate panels for each month
+  labs(
+    title = "Median Ride Duration by Weekday, Month, and Year",
+    x = "Day of the Week",
+    y = "Median Ride Duration (Minutes)",
+    fill = "Year"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+The plot highlights how median ride durations vary by day of the week, month, and year. In both January and July, weekends (especially Saturdays and Sundays) tend to have the longest median ride durations, reflecting increased recreational use during leisure days. The effect is more pronounced in July, where weekend rides in 2020 exhibit notably longer durations compared to those in 2024. Across weekdays, the differences between 2020 and 2024 are more distinct in July compared to January. However, the overall trend indicates that ride durations are longer in 2020 than in 2024 for both months. This plot provides insight into how bike usage varies by day, season, and year, emphasizing the importance of weekends and summer months for longer, likely recreational, rides.
+
+```{r}
+# Filter the data for 2024
+data_2024 <- all_rides  %>%
+  filter(year == 2024)
+
+# Create the plot to show distribution of ride duration by month, membership, and bike type
+ggplot(data_2024, aes(x = duration, fill = rideable_type)) +
+  geom_density(alpha = 0.5) +  # Use density plot to show distribution
+  facet_grid(member_casual ~ month) +  # Facet by membership status and month
+  labs(
+    title = "Distribution of Ride Duration by Month, Membership, and Bike Type (2024)",
+    x = "Ride Duration (Minutes)",
+    y = "Density",
+    fill = "Bike Type"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom", 
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )
+```
 
 
-
-
-
-
-
+The plot reveals distinct patterns in ride duration based on month, membership status, and bike type. In both January and July 2024, electric bikes show a tendency towards shorter ride durations compared to classic bikes, reflecting their use for quick commutes or short trips. This effect is consistent across both members and casual riders. Members exhibit tighter distributions with shorter rides, indicating that they likely use bikes more for practical purposes, such as commuting. In contrast, casual riders show a wider range of durations, particularly with classic bikes, suggesting more recreational use. Additionally, July rides are slightly longer than those in January, which aligns with the expectation that warmer weather encourages longer recreational activities. Overall, this plot highlights that electric bikes are primarily used for shorter trips, and membership status plays a role in the patterns of ride duration, with casual users favoring longer rides, especially in summer months.
 
 
