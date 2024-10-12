@@ -205,6 +205,72 @@ ggplot(nhanes_merged, aes(x = age, fill = sex)) +
 The age distributions by sex across the three education categories reveal distinct patterns. In the "High School Equivalent", both men and women exhibit a fairly balanced distribution, with peaks around the 40 to 60-year range. There is some overlap between the distributions, but men slightly dominate in younger ages, while women are more represented at older ages. In the "Less than high school" category, the age distribution for women skews toward older ages, with a significant peak around the 70 to 80-year range, suggesting that this group has more older women.
 For men, the distribution covers a wider age range, with peaks appearing in both middle-aged (40-50 years) and older (70-80 years) groups. In the "More than high school" category, the age distributions suggest that women are more concentrated in younger age ranges, with a noticeable peak around 20 to 40 years, while the distribution for men spans a broader range, with a slightly higher density in younger ages (30-50 years). This may suggest that more men pursued higher education at younger ages.
 
+```{r}
+# Sum total activity for each participant across all minute columns
+nhanes_total_activity <- 
+  nhanes_merged %>%
+  rowwise() %>%
+  mutate(total_activity = sum(c_across(starts_with("min")), na.rm = TRUE)) %>%
+  ungroup()
+```
+
+```{r}
+# Create the scatterplot of total activity vs. age, with separate panels for education
+ggplot(nhanes_total_activity, aes(x = age, y = total_activity, color = sex)) +
+  geom_point(alpha = 0.6) +  # Scatterplot with transparency
+  geom_smooth(method = "loess", se = FALSE) +  # Add smooth trend lines
+  facet_wrap(~ education) +  # Separate panels for each education category
+  labs(
+    title = "Total Activity vs. Age by Sex and Education Level",
+    x = "Age (years)",
+    y = "Total Activity (MIMS)",
+    color = "Sex"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Adjust x-axis text
+```
+
+The plot shows the relationship between total activity (MIMS) and age, separated by education level and sex. Across all education categories, there is a noticeable decline in total activity with increasing age, although the trends differ slightly between men and women.
+
+In the High School Equivalent category, both men and women exhibit a peak in activity around the 30 to 40-year range, followed by a steady decline, with men generally maintaining higher activity levels than women until the decline levels off around 60 to 70 years.
+
+In the Less than High School category, there is a steeper decline in activity for both men and women as age increases. Women show higher activity levels compared to men in earlylife (20 to 40 years), but both sexes converge to lower levels as they approach older age (70+ years).
+
+In the More than High School category, activity levels are more stable over time, with smaller declines compared to the other education levels. Men and women exhibit relatively similar activity levels in this group, suggesting that individuals with higher education may maintain more consistent activity levels throughout life.
+
+```{r}
+# Reshape the data to long format for plotting (gather all minute columns into one)
+nhanes_long <- nhanes_merged %>%
+  pivot_longer(
+    cols = starts_with("min"), 
+    names_to = "minute", 
+    values_to = "activity"
+  ) %>%
+  mutate(
+    minute = as.numeric(gsub("min", "", minute))  # Convert minute column to numeric
+  )
+
+# Create the three-panel plot
+ggplot(nhanes_long, aes(x = minute, y = activity, color = sex)) +
+  geom_smooth(se = FALSE) +  # Add smooth trend lines for activity throughout the day
+  facet_wrap(~ education, ncol = 1) +  # Create separate panels for each education level
+  labs(
+    title = "24-Hour Activity Time Course by Education Level and Sex",
+    x = "Minute of the Day",
+    y = "Activity (MIMS)",
+    color = "Sex"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis text for readability
+```
+
+The 24-hour activity time course plot reveals clear daily activity patterns across different education levels, with some similarities and subtle differences between men and women. Across all three education levels—"High school equivalent," "Less than high school," and "More than high school"—activity levels increase steadily in the morning (around minute 500, corresponding to 8–9 AM), peak around midday and early afternoon, and decline in the evening. There are small differences between men and women, with women generally showing slightly higher activity levels throughout the day, especially in the "More than high school" category. This might reflect more structured or habitual physical activities among women with higher education. Meanwhile, the "Less than high school" group shows slightly more variability in activity levels during peak hours. Overall, the pattern is consistent: activity peaks around midday and declines steadily toward the evening, with education level appearing to influence the smoothness and consistency of daily activity patterns.
+
+
+
+
+
+
 
 
 
