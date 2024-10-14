@@ -219,8 +219,8 @@ ggplot(nhanes_merged, aes(x = age, fill = sex)) +
        fill = "Sex") +
   theme_minimal()
 ```
-The age distributions by sex across the three education categories reveal distinct patterns. In the "High School Equivalent", both men and women exhibit a fairly balanced distribution, with peaks around the 40 to 60-year range. There is some overlap between the distributions, but men slightly dominate in younger ages, while women are more represented at older ages. In the "Less than high school" category, the age distribution for women skews toward older ages, with a significant peak around the 70 to 80-year range, suggesting that this group has more older women.
-For men, the distribution covers a wider age range, with peaks appearing in both middle-aged (40-50 years) and older (70-80 years) groups. In the "More than high school" category, the age distributions suggest that women are more concentrated in younger age ranges, with a noticeable peak around 20 to 40 years, while the distribution for men spans a broader range, with a slightly higher density in younger ages (30-50 years). This may suggest that more men pursued higher education at younger ages.
+
+The age distributions by sex across the three education categories reveal distinct patterns. In the "High School Equivalent", men have a peak at 20-40 and 50-60 ages, while women have a peak at 60-80 ages . There is some overlap between the distributions, but men slightly dominate in younger ages, while women are more represented at older ages. In the "Less than high school" category, the age distribution for women skews toward older ages, with a significant peak around the 70 to 80-year range, suggesting that this group has more older women. For men, the distribution covers a wider age range, with peaks appearing in both middle-aged (40-50 years) and older (70-80 years) groups. In the "More than high school" category, the age distributions suggest that women are more concentrated in younger age ranges, with a noticeable peak around 20 to 40 years, while the distribution for men spans a broader range, with a slightly higher density in younger ages (30-50 years). This may suggest that women are likely to pursued higher education at younger ages than men.
 
 ```{r}
 # Sum total activity for each participant across all minute columns
@@ -249,7 +249,7 @@ ggplot(nhanes_total_activity, aes(x = age, y = total_activity, color = sex)) +
 
 The plot shows the relationship between total activity (MIMS) and age, separated by education level and sex. Across all education categories, there is a noticeable decline in total activity with increasing age, although the trends differ slightly between men and women.
 
-In the High School Equivalent category, both men and women exhibit a peak in activity around the 30 to 40-year range, followed by a steady decline, with men generally maintaining higher activity levels than women until the decline levels off around 60 to 70 years.
+In the High School Equivalent category, both men and women exhibit a peak in activity around the 30 to 40-year range, followed by a steady decline, with women generally maintaining higher activity levels than men.
 
 In the Less than High School category, there is a steeper decline in activity for both men and women as age increases. Women show higher activity levels compared to men in earlylife (20 to 40 years), but both sexes converge to lower levels as they approach older age (70+ years).
 
