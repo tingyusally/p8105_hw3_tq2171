@@ -125,6 +125,9 @@ tmax_tmin_density_plot <- ggplot(ny_noaa) +
 ```
 
 ```{r}
+snow_filtered <- ny_noaa %>%
+  filter(snow > 0 & snow < 100)
+
 # Snowfall distribution (snowfall > 0 and < 100) by year
 snowfall_violin_plot <- ggplot(snow_filtered, aes(x = year, y = snow)) +
   geom_violin(aes(fill = year)) +  # Violin plot showing distribution by year
@@ -177,18 +180,32 @@ nhanes_merged <- nhanes_merged %>%
   drop_na(sex, age, BMI, education)
 ```
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
 # Create a summary table of the number of men and women in each education category
 gender_education_table <- nhanes_merged %>%
   group_by(education, sex) %>%
   summarise(count = n()) %>%
   ungroup() %>%
   arrange(education, sex)
+
+# Pivot the table to make it wider with education as columns
+pivoted_table <- gender_education_table %>%
+  pivot_wider(
+    names_from = education,
+    values_from = count,
+    values_fill = 0)  # Fill missing values with 0
 ```
 
 ```{r}
-# Display the summary table
-print(gender_education_table)
+library(knitr)
+```
+
+```{r}
+# Display the table using kable for a reader-friendly format
+kable(pivoted_table, 
+      col.names = c("Gender", "Less than HighSchool", "HighSchool Equivalent", "More than HighSchool"),
+      caption = "Gender Distribution Across Education Levels")
+
 ```
 
 ```{r}
@@ -267,7 +284,7 @@ ggplot(nhanes_long, aes(x = minute, y = activity, color = sex)) +
 The 24-hour activity time course plot reveals clear daily activity patterns across different education levels, with some similarities and subtle differences between men and women. Across all three education levels—"High school equivalent," "Less than high school," and "More than high school"—activity levels increase steadily in the morning (around minute 500, corresponding to 8–9 AM), peak around midday and early afternoon, and decline in the evening. There are small differences between men and women, with women generally showing slightly higher activity levels throughout the day, especially in the "More than high school" category. This might reflect more structured or habitual physical activities among women with higher education. Meanwhile, the "Less than high school" group shows slightly more variability in activity levels during peak hours. Overall, the pattern is consistent: activity peaks around midday and declines steadily toward the evening, with education level appearing to influence the smoothness and consistency of daily activity patterns.
 
 # Problem 3
-```{r}
+```{r,warning=FALSE, message=FALSE}
 #Import the datasets
 jan_2020 <- read_csv("./Jan 2020 Citi.csv")
 jan_2024 <- read_csv("./Jan 2024 Citi.csv")
@@ -285,7 +302,7 @@ all_rides <- bind_rows(
 )
 ```
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
 # Group by year, month, and membership type to calculate total rides
 ride_summary <- all_rides %>%
   group_by(year, month, member_casual) %>%
@@ -297,8 +314,12 @@ ride_summary <- all_rides %>%
 # Pivot to create a reader-friendly table
 reader_friendly_table <- ride_summary %>%
   pivot_wider(names_from = member_casual, values_from = total_rides, values_fill = 0)
-# View the table
-print(reader_friendly_table)
+
+# Display the table using kable()
+kable(reader_friendly_table, 
+      col.names = c("Year", "Month", "Casual Riders", "Members"),
+      caption = "Total Rides by Year, Month, and Membership Type",
+      align = "lccc")  # Align columns: left for year, center for others
 ```
 
 The summary table reveals a clear seasonal trend in Citi Bike usage, with more rides occurring in July compared to January, reflecting increased activity during warmer months. From 2020 to 2024, there is a significant increase in both casual and member rides, indicating growing adoption of the bike-sharing service. Notably, casual rides more than doubled over this period, with 2108 rides in January 2024 compared to 984 rides in January 2020, and 10894 rides in July 2024 compared to 5637 rides in July 2020. This suggests expanding interest from non-members. Meanwhile, member rides also increased steadily, from 15411 in July 2020 to 36262 in July 2024, highlighting continued value for regular users. These trends suggest that Citi Bike is growing in popularity, attracting both casual users and maintaining engagement with members throughout the years.
@@ -319,13 +340,15 @@ top_stations <- july_2024_data %>%
 print(top_stations)
 ```
 
-```{r}
+```{r,warning=FALSE, message=FALSE}
 # Calculate the median ride duration for each combination of day, month, and year
 median_duration_data <- all_rides %>%
   group_by(weekdays, month, year) %>%
   summarise(median_duration = median(duration, na.rm = TRUE)) %>%
   ungroup()
+```
 
+```{r}
 # Create the plot
 ggplot(median_duration_data, aes(x = weekdays, y = median_duration, fill = factor(year))) +
   geom_bar(stat = "identity", position = "dodge") +  # Bar plot to compare median durations
